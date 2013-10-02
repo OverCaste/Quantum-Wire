@@ -1,0 +1,6 @@
+name: QuantumWire
+main: com.overmc.quantumwire.QuantumWire
+version: 1.0
+authors: [OverCaste]
+load: STARTUP
+website: "dev.overmc.com"
