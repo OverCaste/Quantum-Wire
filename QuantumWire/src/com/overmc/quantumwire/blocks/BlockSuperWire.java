@@ -6,20 +6,20 @@ import net.minecraft.server.v1_6_R3.*;
 
 public class BlockSuperWire extends Block implements IContainer {
 	public BlockSuperWire( ) {
-		super(22, Material.STONE);
-		this.c(3.0F);
-		this.b(5.0F);
-		this.a(k);
-		this.c("blockLapis");
-		this.a(CreativeModeTab.b);
-		this.d("lapis_block");
-		isTileEntity = true;
+		super(22, Material.STONE); // Id, Material
+		this.c(3.0F); // These are obfuscated methods from Block.class, let's see, this one is hardness.
+		this.b(5.0F); // This one is blast resistance.
+		this.a(k); // This one is step sound
+		this.c("blockLapis"); // Localized name
+		this.a(CreativeModeTab.b); // Creative tab
+		this.d("lapis_block"); // Internal name
+		isTileEntity = true; // Makes the system know there's a tile
 	}
 
 	@Override
 	public void onPlace(World world, int x, int y, int z) {
 		for (int color = 0; color < 16; color++) {
-			handleWireChange(world, x, y, z, 6, color, true);
+			handleWireChange(world, x, y, z, 6, color, true); // Update all wire colors
 		}
 	}
 
@@ -27,9 +27,9 @@ public class BlockSuperWire extends Block implements IContainer {
 	public void remove(World world, int x, int y, int z, int i, int j) {
 		super.remove(world, x, y, z, i, j);
 		for (int color = 0; color < 16; color++) {
-			setUnpowered(world, x, y, z, color);
+			setUnpowered(world, x, y, z, color); // Just to update the neighbors.
 		}
-		world.s(x, y, z); // remove tile entity
+		world.s(x, y, z); // Remove tile entity
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class BlockSuperWire extends Block implements IContainer {
 				return false;
 			}
 			TileEntitySuperWire tile = getSuperTile(world, x, y, z);
-			if (tile == null) {
+			if (tile == null) { // In case that block was placed without the plugin knowing.
 				return false;
 			}
 			return tile.isColorPowered(color) && (tile.getPowerDirection(color) != direction); // is tile powered and not powered by us?
@@ -147,15 +147,7 @@ public class BlockSuperWire extends Block implements IContainer {
 		return new TileEntitySuperWire();
 	}
 
-	public boolean isBlockSuperWire(World world, int x, int y, int z) {
-		return isBlockSuperWire(world.getTypeId(x, y, z)) && (getSuperTile(world, x, y, z) != null);
-	}
-
-	public boolean isBlockSuperWire(int id) {
-		return ((id == 123) || (id == 124));
-	}
-
-	public TileEntitySuperWire getSuperTile(World world, int x, int y, int z) {
+	public TileEntitySuperWire getSuperTile(World world, int x, int y, int z) { // Utility method to get a tile entity.
 		return (TileEntitySuperWire) world.getTileEntity(x, y, z);
 	}
 }

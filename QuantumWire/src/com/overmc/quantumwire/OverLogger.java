@@ -2,7 +2,7 @@ package com.overmc.quantumwire;
 
 import java.util.logging.*;
 
-public class OverLogger extends Logger {
+public class OverLogger extends Logger { // Little class that I use to give a prefix to a logger.
 	final String prefix;
 	final Logger parent;
 
