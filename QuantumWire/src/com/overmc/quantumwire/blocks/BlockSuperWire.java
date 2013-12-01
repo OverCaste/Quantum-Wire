@@ -2,14 +2,14 @@ package com.overmc.quantumwire.blocks;
 
 import java.util.Random;
 
-import net.minecraft.server.v1_6_R3.*;
+import net.minecraft.server.v1_7_R1.*;
 
 public class BlockSuperWire extends Block implements IContainer {
 	public BlockSuperWire( ) {
-		super(22, Material.STONE); // Id, Material
+		super(Material.STONE); // Id, Material
 		this.c(3.0F); // These are obfuscated methods from Block.class, let's see, this one is hardness.
 		this.b(5.0F); // This one is blast resistance.
-		this.a(k); // This one is step sound
+		this.a(i); // This one is step sound
 		this.c("blockLapis"); // Localized name
 		this.a(CreativeModeTab.b); // Creative tab
 		this.d("lapis_block"); // Internal name
@@ -24,8 +24,8 @@ public class BlockSuperWire extends Block implements IContainer {
 	}
 
 	@Override
-	public void remove(World world, int x, int y, int z, int i, int j) {
-		super.remove(world, x, y, z, i, j);
+	public void remove(World world, int x, int y, int z, Block block, int l) {
+		super.remove(world, x, y, z, block, l);
 		for (int color = 0; color < 16; color++) {
 			setUnpowered(world, x, y, z, color); // Just to update the neighbors.
 		}
@@ -33,7 +33,7 @@ public class BlockSuperWire extends Block implements IContainer {
 	}
 
 	@Override
-	public void doPhysics(World world, int x, int y, int z, int l) {
+	public void doPhysics(World world, int i, int j, int k, Block block) {
 		// do nothing
 	}
 
@@ -73,7 +73,7 @@ public class BlockSuperWire extends Block implements IContainer {
 	}
 
 	private boolean isPowered(World world, int x, int y, int z, int direction, int color, boolean allowWires) {
-		Block b = Block.byId[world.getTypeId(x, y, z)];
+		Block b = world.getType(x, y, z);
 		if (b instanceof BlockSuperWire) {
 			if (!allowWires) {
 				return false;
@@ -125,25 +125,25 @@ public class BlockSuperWire extends Block implements IContainer {
 	}
 
 	public void updateSuperState(World world, int x, int y, int z, int fromDir, int color, boolean risingEdge) {
-		Block b = Block.byId[world.getTypeId(x, y, z)];
+		Block b = world.getType(x, y, z);
 		if (b instanceof BlockSuperWire) {
 			((BlockSuperWire) b).handleWireChange(world, x, y, z, fromDir, color, risingEdge);
 		} else if (b instanceof BlockWireThreshold) {
 			if (world.getData(x, y, z) == color) { // only update thresholds that are our color
-				world.update(x, y, z, 0);
+				world.update(x, y, z, this);
 			}
 		}
 	}
 
-	@Override
-	public boolean b(World world, int x, int y, int z, int eventId, int eventData) { // tile event received
-		super.b(world, x, y, z, eventId, eventData);
-		TileEntity tile = world.getTileEntity(x, y, z);
-		return tile != null ? tile.b(eventId, eventData) : false;
-	}
+	// @Override
+	// public boolean b(World world, int x, int y, int z, int eventId, int eventData) { // tile event received (not used in 1.7?)
+	// super.b(world, x, y, z, eventId, eventData);
+	// TileEntity tile = world.getTileEntity(x, y, z);
+	// return tile != null ? tile.b(eventId, eventData) : false;
+	// }
 
 	@Override
-	public TileEntity b(World arg0) { // get tile entity
+	public TileEntity a(World world, int id) { // get tile entity
 		return new TileEntitySuperWire();
 	}
 

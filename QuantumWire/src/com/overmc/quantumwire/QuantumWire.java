@@ -12,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @see com.overmc.quantumwire.blocks.TileEntitySuperWire
  */
 public class QuantumWire extends JavaPlugin {
-	public static final OverLogger logger = new OverLogger(Bukkit.getLogger(), "QuantumWire", "Quantum Wire");
 	private static boolean error = false;
 	private BlockInjector injector;
 	private boolean stopOnCrash = true;
@@ -20,11 +19,11 @@ public class QuantumWire extends JavaPlugin {
 	@Override
 	public void onEnable( ) {
 		try {
-			logger.info("Injecting blocks into the server data.");
-			injector = new BlockInjector();
+			getLogger().info("Injecting blocks into the server data.");
+			injector = new BlockInjector(this);
 			injector.injectClasses();
 			initConfig();
-			logger.info(getDescription().getName() + " v" + getDescription().getVersion() + " enabled!");
+			getLogger().info(getDescription().getName() + " v" + getDescription().getVersion() + " enabled!");
 		} catch (Throwable t) {
 			error = true;
 			t.printStackTrace();
@@ -46,7 +45,7 @@ public class QuantumWire extends JavaPlugin {
 	@Override
 	public void onDisable( ) {
 		if (!error) {
-			logger.info(getDescription().getName() + " disabled.");
+			getLogger().info(getDescription().getName() + " disabled.");
 		}
 	}
 

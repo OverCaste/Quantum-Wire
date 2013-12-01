@@ -1,6 +1,6 @@
 package com.overmc.quantumwire.blocks;
 
-import net.minecraft.server.v1_6_R3.*;
+import net.minecraft.server.v1_7_R1.*;
 
 import org.bukkit.DyeColor;
 

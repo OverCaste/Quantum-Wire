@@ -1,13 +1,13 @@
 package com.overmc.quantumwire.blocks;
 
-import net.minecraft.server.v1_6_R3.*;
+import net.minecraft.server.v1_7_R1.*;
 
 public class BlockWireThreshold extends BlockCloth /* implements IContainer */{
 
 	public BlockWireThreshold( ) {
-		super(35, Material.CLOTH);
+		super(Material.CLOTH);
 		c(0.8F);
-		a(n);
+		a(l); // This changed for some reason (1.6.3 -> 1.7.2)
 		c("cloth");
 		d("wool_colored");
 		// isTileEntity = true;
@@ -15,27 +15,27 @@ public class BlockWireThreshold extends BlockCloth /* implements IContainer */{
 
 	@Override
 	public void onPlace(World world, int x, int y, int z) {
-		world.update(x, y, z, 0);
+		world.update(x, y, z, this);
 		updateSuperWireNeighbors(world, x, y, z, true);
 		super.onPlace(world, x, y, z);
 	}
 
 	@Override
-	public void remove(World world, int x, int y, int z, int i, int j) {
-		super.remove(world, x, y, z, i, j);
-		world.update(x, y, z, 0);
+	public void remove(World world, int x, int y, int z, Block block, int l) {
+		super.remove(world, x, y, z, block, l);
+		world.update(x, y, z, this);
 		updateSuperWireNeighbors(world, x, y, z, false);
 		// world.s(x, y, z); // remove tile entity
 	}
 
 	@Override
-	public void doPhysics(World world, int x, int y, int z, int l) {
+	public void doPhysics(World world, int x, int y, int z, Block b) {
 		updateSuperWireNeighbors(world, x, y, z, isPowered(world, x, y, z));
 	}
 
 	private void updateSuperWireNeighbors(World world, int x, int y, int z, boolean risingEdge) {
 		for (int dir = 0; dir < 6; dir++) {
-			Block b = Block.byId[world.getTypeId(x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir])];
+			Block b = world.getType(x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir]);
 			if ((b != null) && (b instanceof BlockSuperWire)) {
 				((BlockSuperWire) b).updateSuperState(world, x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir], dir, world.getData(x, y, z), risingEdge);
 			}
@@ -61,7 +61,7 @@ public class BlockWireThreshold extends BlockCloth /* implements IContainer */{
 	public boolean isPowered(World world, int x, int y, int z) {
 		for (int dir = 0; dir < 6; dir++) {
 			if (world.getBlockFacePower(x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir], dir) >= 1) { // if a diode or torch is providing any amount of power
-				Block b = Block.byId[world.getTypeId(x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir])];
+				Block b = world.getType(x + Facing.b[dir], y + Facing.c[dir], z + Facing.d[dir]);
 				if ((b != null) && (!((b instanceof BlockRedstoneWire) || (b instanceof BlockWireThreshold))) && b.isPowerSource()) { // all actually powering, non-redstone wire blocks
 					return true;
 				}
