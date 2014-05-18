@@ -12,41 +12,49 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @see com.overmc.quantumwire.blocks.TileEntitySuperWire
  */
 public class QuantumWire extends JavaPlugin {
-	private static boolean error = false;
-	private BlockInjector injector;
-	private boolean stopOnCrash = true;
+    private static boolean error = false;
+    private BlockInjector injector;
+    private boolean stopOnCrash = true;
 
-	@Override
-	public void onEnable( ) {
-		try {
-			getLogger().info("Injecting blocks into the server data.");
-			injector = new BlockInjector(this);
-			injector.injectClasses();
-			initConfig();
-			getLogger().info(getDescription().getName() + " v" + getDescription().getVersion() + " enabled!");
-		} catch (Throwable t) {
-			error = true;
-			t.printStackTrace();
-			if (stopOnCrash) {
-				Bukkit.shutdown();
-			} else {
-				setEnabled(false);
-			}
-		}
-	}
+    private QuantumWireListener listener;
 
-	private void initConfig( ) {
-		getConfig().options().copyDefaults(true);
-		getConfig().addDefault("stop-on-crash", true);
-		saveConfig();
-		stopOnCrash = getConfig().getBoolean("stop-on-crash");
-	}
+    @Override
+    public void onEnable( ) {
+        try {
+            getLogger().info("Injecting blocks into the server data.");
+            injector = new BlockInjector(this);
+            injector.injectClasses();
+            initConfig();
+            initListener();
+            getLogger().info(getDescription().getName() + " v" + getDescription().getVersion() + " enabled!");
+        } catch (Throwable t) {
+            error = true;
+            t.printStackTrace();
+            if (stopOnCrash) {
+                Bukkit.shutdown();
+            } else {
+                setEnabled(false);
+            }
+        }
+    }
 
-	@Override
-	public void onDisable( ) {
-		if (!error) {
-			getLogger().info(getDescription().getName() + " disabled.");
-		}
-	}
+    private void initConfig( ) {
+        getConfig().options().copyDefaults(true);
+        getConfig().addDefault("stop-on-crash", true);
+        saveConfig();
+        stopOnCrash = getConfig().getBoolean("stop-on-crash");
+    }
+
+    private void initListener( ) {
+        listener = new QuantumWireListener(this);
+        getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    @Override
+    public void onDisable( ) {
+        if (!error) {
+            getLogger().info(getDescription().getName() + " disabled.");
+        }
+    }
 
 }
