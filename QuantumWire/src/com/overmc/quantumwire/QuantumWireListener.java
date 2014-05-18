@@ -32,7 +32,7 @@ public class QuantumWireListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void handlePlayerInteract(PlayerInteractEvent e) {
-        if (Action.RIGHT_CLICK_BLOCK.equals(e.getAction()) && Material.WOOL.equals(e.getItem().getType())) {
+        if (Action.RIGHT_CLICK_BLOCK.equals(e.getAction()) && (e.getItem() != null) && Material.WOOL.equals(e.getItem().getType())) {
             final UUID uuid = e.getPlayer().getUniqueId();
             playerHeldWoolIds.put(uuid, e.getItem().getDurability());
             Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
