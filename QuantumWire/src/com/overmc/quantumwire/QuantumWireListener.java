@@ -21,11 +21,12 @@ public class QuantumWireListener implements Listener {
         this.plugin = plugin;
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void handleBlockPlace(BlockPlaceEvent e) {
         Block b = e.getBlock();
         if (Material.WOOL.equals(b.getType())) {
-
+            b.setData(playerHeldWoolIds.get(e.getPlayer().getUniqueId()).byteValue());
         }
     }
 
