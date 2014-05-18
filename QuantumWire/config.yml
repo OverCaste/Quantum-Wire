@@ -1,9 +1,0 @@
-suer: 25565
-server-type: other
-default-packet-timeout: 200
-debug-mode: false
-block-ids:
-  super-wire-off: 95:7
-  super-wire-on: 95:4
-  threshold: 35
-  
