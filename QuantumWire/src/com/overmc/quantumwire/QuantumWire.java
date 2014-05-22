@@ -47,7 +47,7 @@ public class QuantumWire extends JavaPlugin {
 
     private void initListener( ) {
         listener = new QuantumWireListener(this);
-        getServer().getPluginManager().registerEvents(listener, this);
+        listener.register();
     }
 
     @Override
