@@ -3,6 +3,7 @@ package com.overmc.quantumwire.blocks;
 import net.minecraft.server.v1_7_R3.Block;
 import net.minecraft.server.v1_7_R3.BlockCloth;
 import net.minecraft.server.v1_7_R3.BlockRedstoneWire;
+import net.minecraft.server.v1_7_R3.CreativeModeTab;
 import net.minecraft.server.v1_7_R3.Facing;
 import net.minecraft.server.v1_7_R3.IBlockAccess;
 import net.minecraft.server.v1_7_R3.Material;
@@ -13,11 +14,11 @@ public class BlockWireThreshold extends BlockCloth /* implements IContainer */{
 
     public BlockWireThreshold( ) {
         super(Material.CLOTH);
-        c(0.8F);
-        a(l); // This changed for some reason (1.6.3 -> 1.7.2)
+        a(CreativeModeTab.b);
+        c(0.8f);
+        a(l);
         c("cloth");
         d("wool_colored");
-        // isTileEntity = true;
     }
 
     @Override

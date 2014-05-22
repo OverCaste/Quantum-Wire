@@ -15,11 +15,11 @@ public class VersioningClassLoader extends ClassLoader {
     protected final ImmutableSet<String> validFiles = ImmutableSet
             .of("com.overmc.quantumwire.blocks.BlockSuperWire", "com.overmc.quantumwire.blocks.BlockWireThreshold", "com.overmc.quantumwire.blocks.TileEntitySuperWire");
 
-    protected final String version;
+    protected final String replace;
 
-    public VersioningClassLoader(ClassLoader parent, String version) {
+    public VersioningClassLoader(ClassLoader parent, String replace) {
         super(parent);
-        this.version = version;
+        this.replace = replace;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class VersioningClassLoader extends ClassLoader {
                 if (e != null) {
                     ConstantPoolEntry written = e;
                     if (e.getTag() == ConstantPoolEntries.UTF8_TAG) {
-                        written = new ConstantPoolEntryUtf8(e.getTag(), ((ConstantPoolEntryUtf8) e).getValue().replace("v1_7_R3", version)); // Replace all instances of 'v1_7_R3' to our value.
+                        written = new ConstantPoolEntryUtf8(e.getTag(), ((ConstantPoolEntryUtf8) e).getValue().replace("net/minecraft/server/v1_7_R3/", replace)); // Replace all instances of 'v1_7_R3' to our value.
                     }
                     written.write(dout);
                 }

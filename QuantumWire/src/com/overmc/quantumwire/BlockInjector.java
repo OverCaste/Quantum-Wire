@@ -2,6 +2,7 @@ package com.overmc.quantumwire;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
@@ -17,6 +18,7 @@ public class BlockInjector {
 
     private final Class<?> registrySimpleClass;
     private final Class<?> registryMaterialsClass;
+    private final Class<?> blocksClass;
     private final Class<?> blockClass;
     private final Class<?> tileEntityClass;
 
@@ -25,15 +27,17 @@ public class BlockInjector {
 
     private final Method registryHashObjectMethod;
     private final Method registryAddMethod;
+    private final Method registryGetMethod;
 
     private final VersioningClassLoader blockLoader;
 
     public BlockInjector(QuantumWire plugin) throws Exception {
         this.plugin = plugin;
-        registrySimpleClass = Class.forName("net.minecraft.server." + getMinecraftVersion() + ".RegistrySimple");
-        registryMaterialsClass = Class.forName("net.minecraft.server." + getMinecraftVersion() + ".RegistryMaterials");
-        blockClass = Class.forName("net.minecraft.server." + getMinecraftVersion() + ".Block"); // Just to deal with ever-changing versions.
-        tileEntityClass = Class.forName("net.minecraft.server." + getMinecraftVersion() + ".TileEntity"); // ^
+        registrySimpleClass = Class.forName(getMinecraftNmsPrefix() + "RegistrySimple");
+        registryMaterialsClass = Class.forName(getMinecraftNmsPrefix() + "RegistryMaterials");
+        blockClass = Class.forName(getMinecraftNmsPrefix() + "Block"); // Just to deal with ever-changing versions.
+        blocksClass = Class.forName(getMinecraftNmsPrefix() + "Blocks");
+        tileEntityClass = Class.forName(getMinecraftNmsPrefix() + "TileEntity"); // ^
         REGISTRYField = blockClass.getDeclaredField("REGISTRY");
         REGISTRYField.setAccessible(true);
         registrySimpleMapField = registrySimpleClass.getDeclaredField("c");
@@ -42,17 +46,23 @@ public class BlockInjector {
         registryHashObjectMethod.setAccessible(true);
         registryAddMethod = registryMaterialsClass.getDeclaredMethod("a", new Class[] {int.class, String.class, Object.class});
         registryAddMethod.setAccessible(true);
-        blockLoader = new VersioningClassLoader(getClass().getClassLoader(), getMinecraftVersion());
+        registryGetMethod = registryMaterialsClass.getDeclaredMethod("a", String.class);
+        blockLoader = new VersioningClassLoader(getClass().getClassLoader(), getMinecraftNmsPrefix().replace('.', '/'));
     }
 
     @SuppressWarnings("rawtypes")
-    private void setBlock(String blockName, Class<?> clazz, int id) throws Exception {
+    private void setBlock(String blockName, String blockFieldName, Class<?> clazz, int id) throws Exception {
         Object REGISTRY = REGISTRYField.get(null);
         Object key = registryHashObjectMethod.invoke(null, blockName);
         Map registrySimpleMap = (Map) registrySimpleMapField.get(REGISTRY);
         registrySimpleMap.remove(key); // Remove the original object from the registry
         Object value = clazz.getConstructor().newInstance();
         registryAddMethod.invoke(REGISTRY, id, blockName, value);
+        Field f = blocksClass.getField(blockFieldName);
+        Field modifiers = Field.class.getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(f, f.getModifiers() & ~Modifier.FINAL);
+        f.set(null, registryGetMethod.invoke(REGISTRYField.get(null), blockName));
         plugin.getLogger().info("Injected block [" + value.getClass().getSimpleName() + "] to [" + blockName + "]"); // We've successfully injected!
     }
 
@@ -93,17 +103,29 @@ public class BlockInjector {
         }
         if (setTileEntity("Super Wire", blockLoader.findClass("com.overmc.quantumwire.blocks.TileEntitySuperWire"))) { // Injecting the tile first, if it succeeded, inject the block
             // removeBlock(Material.LAPIS_BLOCK.getId()); // Remove the original block, you need to do this or you get exceptions in the constructor on the next line. (1.7 changed this)
-            setBlock("lapis_block", blockLoader.findClass("com.overmc.quantumwire.blocks.BlockSuperWire"), 22); // Inject the block.
+            setBlock("lapis_block", "LAPIS_BLOCK", blockLoader.findClass("com.overmc.quantumwire.blocks.BlockSuperWire"), 22); // Inject the block.
         }
         // Blocks
         // removeBlock(Material.WOOL.getId()); //1.7 changed this
-        setBlock("wool", blockLoader.findClass("com.overmc.quantumwire.blocks.BlockWireThreshold"), 35);
+        setBlock("wool", "WOOL", blockLoader.findClass("com.overmc.quantumwire.blocks.BlockWireThreshold"), 35);
     }
 
-    public static String getMinecraftVersion( ) {
-        String[] split = Bukkit.getServer().getClass().getName().split("\\."); // Have to escape that regex.
+    public static String getMinecraftNmsPrefix( ) {
+        String version = getMinecraftVersion();
+        if (version.length() > 0) {
+            return "net.minecraft.server." + version + ".";
+        }
+        return "net.minecraft.server.";
+    }
+
+    private static String getMinecraftVersion( ) {
+        String className = Bukkit.getServer().getClass().getName();
+        String[] split = className.split("\\."); // Have to escape that regex.
         if (split.length != 5) { // Something went wrong, the format should be org.bukkit.craftbukkit.v###.CraftServer
-            throw new RuntimeException("Couldn't find minecraft version, are you running a compatible version of CraftBukkit?");
+            if (className.equals("org.bukkit.craftbukkit.CraftServer")) {
+                return ""; // There is no version
+            }
+            throw new RuntimeException("Couldn't find minecraft version, are you running a compatible version of CraftBukkit? (" + Bukkit.getServer().getClass().getName() + ")");
         }
         return split[3]; // return the v###. Unfortunately the other blocks need specific imports, but I'm working on this.
     }
